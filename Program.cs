@@ -8,11 +8,10 @@ using Microsoft.SqlServer;
 using Rent_a_Car;
 
 //-------------TODO------------------
-//REMOVE DUMMY SQL CODE
-//LOGINUSER/CREATE LOGGED IN USER OBJECT
-//CREATE PROGRAMLOOP
+//REMOVE DUMMY SQL 
+//VALIDATE INPUT DATA THROUGH EXCEPTIONS
 //FIX PASSWORD HASH N SALT
-//UPDATE SQL DIAGRAM
+
 
 static class Program
 {

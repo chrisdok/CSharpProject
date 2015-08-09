@@ -3,8 +3,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Globalization;
 using System.Data.SqlClient;
-
-//ADD REGISTER USER FUNCTION
+using System.ComponentModel.DataAnnotations; //for email verification
 
 public class Person
 {
@@ -36,35 +35,114 @@ public class Person
 
     public static bool RegisterPerson()
     {
-        string Email, Password, FirstName, LastName, DateOfBirth, DateHired;
+        string Email, Password, FirstName, LastName, DateOfBirth, DateHired;    //Should be camelcase
         int isEmployee, isCustomer;
+        EmailAddressAttribute EmailAttr = new EmailAddressAttribute();
+        DateTime dateValue;
 
         Console.WriteLine("\n\n------------Register User---------------");
+        
+        //Get and validate email
         Console.Write("\n\tEmail: ");
-        Email = Console.ReadLine();
+        while(true) 
+        {
+            Email = Console.ReadLine();
+            if(EmailAttr.IsValid(Email)) 
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("\tInvalid email-address!");
+            }
+        }
+        
+        //Get and validate password
         Console.Write("\n\tPassword: ");
-        Password = Console.ReadLine();
+        while(true)
+        {
+            Password = Console.ReadLine();
+            if (Password.Length < 6)
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("\tPassword must at least be 6 characters!");
+            }
+        }
+        
+        //Get and validate firstname
         Console.Write("\n\tFirstname: ");
-        FirstName = Console.ReadLine();
+        while (true)
+        {
+            FirstName = Console.ReadLine();
+            if (!String.IsNullOrWhiteSpace(FirstName))
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("\tFirstname can't be empty!");
+            }
+        }
+
+        //Get and validate lastname
         Console.Write("\n\tLastname: ");
-        LastName = Console.ReadLine();
+        while (true)
+        {
+            LastName = Console.ReadLine();
+            if (!String.IsNullOrWhiteSpace(LastName))
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("\tLastname can't be empty!");
+            }
+        }
+
+        //Get and validate date of birth
         Console.Write("\n\tDate of birth (yyyy-mm-dd): ");
-        DateOfBirth = Console.ReadLine();
+        while (true)
+        {
+            DateOfBirth = Console.ReadLine();
+            if (DateTime.TryParseExact(DateOfBirth, "yyyy-MM-dd", new CultureInfo("no-NB"), DateTimeStyles.None, out dateValue))
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("\tDate doesn't match format!");
+            }
+        }
 
         Console.Write("\n\tEmployee (0 or 1): ");
-        isEmployee = (Console.ReadLine() == "0" ? 0 : 1);
+        isEmployee = (Console.ReadLine() == "1" ? 1 : 0);
         Console.Write("\n\tCustomer (0 or 1): ");
-        isCustomer = (Console.ReadLine() == "0" ? 0 : 1);
+        isCustomer = (Console.ReadLine() == "1" ? 1 : 0);
 
-        if (isEmployee == 1)
+        if (isEmployee == 1)    //Checks for employeedata if the employee flag is set
         {
             Console.Write("\n\tDate hired (yyyy-mm-dd): ");
-            DateHired = Console.ReadLine();
+            while (true)
+            {
+                DateHired = Console.ReadLine();
+                if (DateTime.TryParseExact(DateHired, "yyyy-MM-dd", new CultureInfo("no-NB"), DateTimeStyles.None, out dateValue))
+                {
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("\tDate doesn't match format!");
+                }
+            } 
         }
         else
         {
             DateHired = null;
         }
+        
         try
         {
             using (SqlConnection conn = new SqlConnection())
