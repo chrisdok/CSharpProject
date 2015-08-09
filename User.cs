@@ -12,7 +12,7 @@ public class User
     private static User Instance = null; 
     private Associate LoggedInUser { get; set; }
 
-    public User() 
+    private User() 
     {
         Login();
     }
@@ -41,22 +41,26 @@ public class User
         string email = "";
         string password = "";
 
+        Console.WriteLine("---------------Login--------------------");
+
         do
         {
-            Console.WriteLine("Email: ");
+            Console.Write("\tEmail: ");
             email = Console.ReadLine();
 
-            Console.WriteLine("Password: ");
+            Console.Write("\tPassword: ");
             password = Console.ReadLine();
         }
         while (!LoginUser(email, password));
+        Console.WriteLine("\n\tSucessfully logged in!");
     }
 
     /**
      * Logs in user, saves associate object and returns true if successful, else returns false
      **/
-    private bool LoginUser(string username, string password)
+    private bool LoginUser(string email, string password)
     {
+        System.Data.DataTable dt = new System.Data.DataTable();
 
         using (SqlConnection conn = new SqlConnection())
         {
@@ -65,45 +69,36 @@ public class User
             conn.Open();
 
             // Sets up sql query
-            SqlCommand command = new SqlCommand("SELECT * FROM VehicleType WHERE VehicleTypeID = @0", conn);
+            SqlCommand command = new SqlCommand("SELECT * FROM [User] WHERE Email = @0 AND Password = @1", conn);
 
             // Adds parameters to query variables
-            command.Parameters.Add(new SqlParameter("@0", 1));
+            
+            command.Parameters.Add(new SqlParameter("@0", email));
+            command.Parameters.Add(new SqlParameter("@1", password));
 
             // Executes query, and displays data 
             using (SqlDataReader reader = command.ExecuteReader())
             {
-                Console.WriteLine("VehicleTypeID\tVehicleTypeName\t");
-                while (reader.Read())
+                if (reader.HasRows)
                 {
-                    Console.WriteLine(String.Format("{0} \t | {1}",
-                        reader[0], reader[1]));
+                    dt.Load(reader); 
+                    conn.Close();
+                    LoggedInUser = new Associate(dt);
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("\tWrong username/password!");
+                    conn.Close();
+                    return false;
                 }
             }
-            Console.WriteLine("Press a button to continue");
-            Console.ReadLine();
-
         }
-
-        if (true)
-        {
-            LoggedInUser = new Associate();
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-        
     }
 
     public static void Logout()
     {
-
-    }
-
-    private bool RegisterUser()
-    {
-        return true;
+        Instance = null;
+        Console.WriteLine("\n\tSuccessfully logged out!\n");
     }
 }

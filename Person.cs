@@ -2,6 +2,7 @@
 using System.Text;
 using System.Security.Cryptography;
 using System.Globalization;
+using System.Data.SqlClient;
 
 //ADD REGISTER USER FUNCTION
 
@@ -22,9 +23,84 @@ public class Person
 	{
 	}
 
-    public static int RegisterPerson()
+    public Person(System.Data.DataTable table) {
+        
+        PersonID = (int)table.Rows[0]["UserID"];
+        Email = table.Rows[0]["Email"].ToString();
+        Password = table.Rows[0]["Password"].ToString();
+        FirstName = table.Rows[0]["FirstName"].ToString();
+        LastName = table.Rows[0]["LastName"].ToString();
+        DateOfBirth = table.Rows[0]["DateOfBirth"].ToString();
+        DateRegistered = table.Rows[0]["DateRegistered"].ToString();
+    }
+
+    public static bool RegisterPerson()
     {
-        return 1;
+        string Email, Password, FirstName, LastName, DateOfBirth, DateHired;
+        int isEmployee, isCustomer;
+
+        Console.WriteLine("\n\n------------Register User---------------");
+        Console.Write("\n\tEmail: ");
+        Email = Console.ReadLine();
+        Console.Write("\n\tPassword: ");
+        Password = Console.ReadLine();
+        Console.Write("\n\tFirstname: ");
+        FirstName = Console.ReadLine();
+        Console.Write("\n\tLastname: ");
+        LastName = Console.ReadLine();
+        Console.Write("\n\tDate of birth (yyyy-mm-dd): ");
+        DateOfBirth = Console.ReadLine();
+
+        Console.Write("\n\tEmployee (0 or 1): ");
+        isEmployee = (Console.ReadLine() == "0" ? 0 : 1);
+        Console.Write("\n\tCustomer (0 or 1): ");
+        isCustomer = (Console.ReadLine() == "0" ? 0 : 1);
+
+        if (isEmployee == 1)
+        {
+            Console.Write("\n\tDate hired (yyyy-mm-dd): ");
+            DateHired = Console.ReadLine();
+        }
+        else
+        {
+            DateHired = null;
+        }
+        try
+        {
+            using (SqlConnection conn = new SqlConnection())
+            {
+                // Opens database via connectionstring
+                conn.ConnectionString = "Data Source=(localdb)\\MyInstance;Initial Catalog=RentACar;Integrated Security=True";
+                conn.Open();
+
+                // Sets up sql query
+                SqlCommand command = new SqlCommand(@"INSERT INTO [User] (Email, Password, FirstName, LastName, DateOfBirth, DateRegistered, isEmployee, isCustomer, DateHired) 
+                    VALUES  (@Email, @Password, @FirstName, @LastName, @DateOfBirth, GETDATE(), @isEmployee, @isCustomer, @DateHired)", conn);
+
+                // Adds parameters to query variables
+
+                command.Parameters.Add(new SqlParameter("@Email", Email));
+                command.Parameters.Add(new SqlParameter("@Password", Password));
+                command.Parameters.Add(new SqlParameter("@FirstName", FirstName));
+                command.Parameters.Add(new SqlParameter("@LastName", LastName));
+                command.Parameters.Add(new SqlParameter("@DateOfBirth", DateTime.ParseExact(DateOfBirth + " 00:00:00.000","yyyy-MM-dd HH:mm:ss.fff", null)));
+                command.Parameters.Add(new SqlParameter("@isEmployee", isEmployee));
+                command.Parameters.Add(new SqlParameter("@isCustomer", isCustomer));
+                command.Parameters.Add(new SqlParameter("@DateHired", (DateHired == null ? (object) DBNull.Value : DateHired)));
+
+                command.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+        catch (SqlException ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return false;
+        }
+
+        Console.WriteLine("\tRegistration successful!");
+
+        return true;
     }
 
     public static Person RegisterPerson(int PersonID) 
@@ -135,9 +211,11 @@ public class Associate : Person
 {
     private string DateHired { get; set; }
 
-    public Associate() : base ()
+    public Associate() : base () { }
+
+    public Associate(System.Data.DataTable table) : base(table)
     {
-        
+        DateHired = table.Rows[0]["DateHired"].ToString();
     }
 }
 

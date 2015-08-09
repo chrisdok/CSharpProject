@@ -7,10 +7,12 @@ using System.Windows.Forms;
 using Microsoft.SqlServer;
 using Rent_a_Car;
 
-
+//-------------TODO------------------
 //REMOVE DUMMY SQL CODE
 //LOGINUSER/CREATE LOGGED IN USER OBJECT
 //CREATE PROGRAMLOOP
+//FIX PASSWORD HASH N SALT
+//UPDATE SQL DIAGRAM
 
 static class Program
 {
@@ -18,7 +20,7 @@ static class Program
     static void Main()
     {
 
-        //User user = new User();
+        User user = User.GetInstance();
 
         string command = "";
 
@@ -40,6 +42,7 @@ static class Program
                     break;
                 case "l": 
                     User.Logout();
+                    User.GetInstance();
                     break;
             }
         }
