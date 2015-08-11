@@ -9,7 +9,8 @@ using Rent_a_Car;
 
 //-------------TODO------------------
 //REMOVE DUMMY SQL 
-//VALIDATE INPUT DATA THROUGH EXCEPTIONS
+//GET RENTING RECORDS/ECONOMY THROUGH DATABASE
+//ADD INPUT VALIDATION TO STAT MENU
 //FIX PASSWORD HASH N SALT
 
 
@@ -38,6 +39,9 @@ static class Program
                     break;
                 case "ru": 
                     Person.RegisterPerson();
+                    break;
+                case "e":
+                    Statistic.ListOptions();
                     break;
                 case "l": 
                     User.Logout();
@@ -82,6 +86,7 @@ static class Program
         Console.WriteLine("\tr: Rent a car");
         Console.WriteLine("\trv: Register vehicle");
         Console.WriteLine("\tru: Register user");
+        Console.WriteLine("\te: Economy");
         Console.WriteLine("\tl: Log out user");
         Console.WriteLine("----------------------------------------");
         Console.Write("\tSelect an option: ");

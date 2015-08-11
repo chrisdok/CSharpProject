@@ -21,7 +21,11 @@ public class Person
 	public Person()
 	{
 	}
-
+    /**
+     * Takes an DataTable containing sql data rows from the User table in the sql database, and saves 
+     * the person data
+     * @input DataTable rows from dbo.User table
+     **/
     public Person(System.Data.DataTable table) {
         
         PersonID = (int)table.Rows[0]["UserID"];
@@ -33,12 +37,17 @@ public class Person
         DateRegistered = table.Rows[0]["DateRegistered"].ToString();
     }
 
+    /**
+     * Registers a new person, asks for information through console, and executes a query to upload
+     * data to a the SQL server.
+     * @return bool true if successful, and false if failed
+     **/
     public static bool RegisterPerson()
     {
         string Email, Password, FirstName, LastName, DateOfBirth, DateHired;    //Should be camelcase
         int isEmployee, isCustomer;
-        EmailAddressAttribute EmailAttr = new EmailAddressAttribute();
-        DateTime dateValue;
+        EmailAddressAttribute EmailAttr = new EmailAddressAttribute();          //Used for email validation
+        DateTime dateValue;                                                     //Used for date conversion
 
         Console.WriteLine("\n\n------------Register User---------------");
         
@@ -117,13 +126,18 @@ public class Person
             }
         }
 
+        //Check if employee
         Console.Write("\n\tEmployee (0 or 1): ");
         isEmployee = (Console.ReadLine() == "1" ? 1 : 0);
+        
+        //Check if customer
         Console.Write("\n\tCustomer (0 or 1): ");
         isCustomer = (Console.ReadLine() == "1" ? 1 : 0);
 
-        if (isEmployee == 1)    //Checks for employeedata if the employee flag is set
+        //Checks for employeedata if the employee flag is set
+        if (isEmployee == 1)    
         {
+            //Get date hired
             Console.Write("\n\tDate hired (yyyy-mm-dd): ");
             while (true)
             {
@@ -143,20 +157,20 @@ public class Person
             DateHired = null;
         }
         
+        //Set up connection and upload date to SQL server
         try
         {
             using (SqlConnection conn = new SqlConnection())
             {
-                // Opens database via connectionstring
+                //Opens database via connectionstring
                 conn.ConnectionString = "Data Source=(localdb)\\MyInstance;Initial Catalog=RentACar;Integrated Security=True";
                 conn.Open();
 
-                // Sets up sql query
+                //Sets up sql query
                 SqlCommand command = new SqlCommand(@"INSERT INTO [User] (Email, Password, FirstName, LastName, DateOfBirth, DateRegistered, isEmployee, isCustomer, DateHired) 
                     VALUES  (@Email, @Password, @FirstName, @LastName, @DateOfBirth, GETDATE(), @isEmployee, @isCustomer, @DateHired)", conn);
 
-                // Adds parameters to query variables
-
+                //Adds parameters to query variables
                 command.Parameters.Add(new SqlParameter("@Email", Email));
                 command.Parameters.Add(new SqlParameter("@Password", Password));
                 command.Parameters.Add(new SqlParameter("@FirstName", FirstName));
@@ -166,6 +180,7 @@ public class Person
                 command.Parameters.Add(new SqlParameter("@isCustomer", isCustomer));
                 command.Parameters.Add(new SqlParameter("@DateHired", (DateHired == null ? (object) DBNull.Value : DateHired)));
 
+                //Execute query and close connection
                 command.ExecuteNonQuery();
                 conn.Close();
             }
@@ -191,8 +206,10 @@ public class Person
 
     }
 
-    /* Generates hash to be used for user passwords
-     * @author https://msdn.microsoft.com/en-us/library/aa545602(v=cs.70).aspx */
+    /**
+     * Generates hash to be used for user passwords
+     * @author https://msdn.microsoft.com/en-us/library/aa545602(v=cs.70).aspx 
+     **/
     public static string GenerateSaltValue()
     {
         UnicodeEncoding utf16 = new UnicodeEncoding();
@@ -229,8 +246,10 @@ public class Person
         return null;
     }
 
-    /* Hashes a password using GenerateSaltValue() function
-     * @author https://msdn.microsoft.com/en-us/library/aa545602(v=cs.70).aspx */
+    /**
+     * Hashes a password using GenerateSaltValue() function
+     * @author https://msdn.microsoft.com/en-us/library/aa545602(v=cs.70).aspx 
+     **/
     private static string HashPassword(string clearData, string saltValue, HashAlgorithm hash)
     {
         UnicodeEncoding encoding = new UnicodeEncoding();
@@ -291,6 +310,11 @@ public class Associate : Person
 
     public Associate() : base () { }
 
+    /**
+     * Takes an DataTable containing sql data rows from the User table in the sql database, saves 
+     * associate data, and sends the same table to the Person class constructor
+     * @input DataTable rows from dbo.User table
+     **/
     public Associate(System.Data.DataTable table) : base(table)
     {
         DateHired = table.Rows[0]["DateHired"].ToString();
